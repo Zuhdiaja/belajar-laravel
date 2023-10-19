@@ -6,7 +6,7 @@ use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Storage;
 
 class SiswaController extends Controller
 {
@@ -62,19 +62,21 @@ class SiswaController extends Controller
     // update
     public function updatesiswa(Request $req, $id){
 
-        $validator =  Validator::make($req->all(),[
-            'nama_siswa'=>'required',
-            'tanggal_lahir'=>'required',
-            'gender'=>'required',
-            'alamat'=>'required'
+        $validator = Validator::make($req->all(), [
+            'nama_siswa' => 'required',
+            'tanggal_lahir' => 'required',
+            'gender' => 'required',
+            'alamat' => 'required',
         ]);
 
         if($validator->fails()){
             return Response()->json($validator->errors()->toJson());
         }
+
         $imagename = time() . '.' . $req->foto->extension();
         $req->foto-> move(public_path('images'),$imagename); 
-        $ubah= siswa::where('id',$id)->update(
+
+        $ubah= Siswa::where('id', "=" , $id)->update(
             [
                 'nama_siswa' => $req->input('nama_siswa'),
                 'tanggal_lahir' => $req->input('tanggal_lahir'),
@@ -83,6 +85,7 @@ class SiswaController extends Controller
                 'alamat' => $req->input('alamat'),
             ]);
 
+            // return response()->json($data)
             if($ubah){
                 return Response()->json(['status' => true , 'message' => 'sukses update siswa' ]);
             }else{
@@ -94,9 +97,15 @@ class SiswaController extends Controller
       // delet
 
       public function deletesiswa($id){
+          //Fungsi Untuk Hapus Gambar
+          $gambar = siswa::where("id" , "=" ,  $id)->get('gambar');
 
-        $hapus = siswa::find($id) -> delete();
-        
+          $filePath = 'publlic/images/' . $gambar;
+
+          Storage::delete($filePath);
+          
+          //hapus data siswa
+          $hapus = siswa::find($id) -> delete();
 
         if($hapus){
             return Response()->json(['status' => true , 'message' => 'sukses hapus siswa' ]);
