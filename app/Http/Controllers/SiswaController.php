@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class SiswaController extends Controller
@@ -32,18 +31,10 @@ class SiswaController extends Controller
 
         if ($validator->fails()) {
             return Response()->json($validator->errors()->toJson());
-        
-
         }
-        // if ($req->hasFile('image')) {
-        //     $image = $req->file('image');
-        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
-        //     $image->move(public_path('images'), $imageName);
-        //     return response()->json($image);
-        // }
 
         $imageName = $req->file('gambar');
-        $imageName->storeAs('public/images' , $imageName->hashName());
+        $imageName->storeAs('public/images', $imageName->hashName());
 
         $create = Siswa::create([
             'nama_siswa' => $req->get('nama_siswa'),
@@ -60,7 +51,8 @@ class SiswaController extends Controller
     }
 
     // update
-    public function updatesiswa(Request $req, $id){
+    public function updatesiswa(Request $req, $id)
+    {
 
         $validator = Validator::make($req->all(), [
             'nama_siswa' => 'required',
@@ -69,48 +61,53 @@ class SiswaController extends Controller
             'alamat' => 'required',
         ]);
 
-        if($validator->fails()){
-            return Response()->json($validator->errors()->toJson());
+        if ($validator->fails()) {
+            return Response()->json($validator->errors());
         }
 
-        $imagename = time() . '.' . $req->foto->extension();
-        $req->foto-> move(public_path('images'),$imagename); 
+        // $imagename = time() . '.' . $req->file("gambar")->getClientOriginalExtension();
+        // $req->foto->move(public_path('images'), $imagename);
 
-        $ubah= Siswa::where('id', "=" , $id)->update(
+        $imageName = $req->file('gambar');
+        $imageName->storeAs('public/images', $imageName->hashName());
+
+        $ubah = Siswa::where('id', "=", $id)->update(
             [
                 'nama_siswa' => $req->input('nama_siswa'),
                 'tanggal_lahir' => $req->input('tanggal_lahir'),
                 'gender' => $req->input('gender'),
-                'gambar' => $imagename,
+                'gambar' => $imageName->hashName(),
                 'alamat' => $req->input('alamat'),
-            ]);
+            ]
+        );
 
-            // return response()->json($data)
-            if($ubah){
-                return Response()->json(['status' => true , 'message' => 'sukses update siswa' ]);
-            }else{
-                return Response()->json(['status' => false , 'message' => 'Gagal update siswa' ]);
-
-            }
+        // return response()->json($data)
+        if ($ubah) {
+            return Response()->json(['status' => true, 'message' => 'sukses update siswa']);
+        } else {
+            return Response()->json(['status' => false, 'message' => 'Gagal update siswa']);
+        }
     }
 
-      // delet
+    // delet
 
-      public function deletesiswa($id){
-          //Fungsi Untuk Hapus Gambar
-          $gambar = siswa::where("id" , "=" ,  $id)->get('gambar');
+    public function deletesiswa($id)
+    {
+        //Fungsi Untuk Hapus Gambar
+        $gambar = siswa::where("id", "=",  $id)->get('gambar');
 
-          $filePath = 'publlic/images/' . $gambar;
+        $filePath = 'images/' . $gambar;
 
-          Storage::delete($filePath);
-          
-          //hapus data siswa
-          $hapus = siswa::find($id) -> delete();
+        Storage::disk('public')->delete($filePath);
 
-        if($hapus){
-            return Response()->json(['status' => true , 'message' => 'sukses hapus siswa' ]);
-        }else{
-            return Response()->json(['status' => false , 'message' => 'Gagal hapus siswa' ]);
+        //hapus data siswa
+        $hapus = siswa::find($id)->delete();
+        // $hapus = Siswa::where("id" , "=" , $id);
+
+        if ($hapus) {
+            return Response()->json(['status' => true, 'message' => 'sukses hapus siswa']);
+        } else {
+            return Response()->json(['status' => false, 'message' => 'Gagal hapus siswa']);
         }
     }
 

@@ -26,15 +26,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/getsiswa', [SiswaController::class, 'getsiswa']);
     Route::post('/createsiswa', [SiswaController::class, 'createsiswa']);
-    Route::put('/updatesiswa/{id}', [SiswaController::class, 'updatesiswa']);
+    Route::post('/updatesiswa/{id}', [SiswaController::class, 'updatesiswa']);
     Route::delete('/deletesiswa/{id}', [SiswaController::class, 'deletesiswa']);
 });
 
 
-Route::get('/getImage/{id}' , function($id){
-    $gambar = Siswa::where("id" , "=" , $id)->get('gambar');
-    return response()->json($gambar);
-});
+// Route::get('/getImage/{id}' , function($id){
+//     $gambar = Siswa::where("id" , "=" , $id)->get('gambar');
+//     return response()->json($gambar);
+// });
 
 Route::post('/register', [AuthController::class, "register"]);
 Route::post('/login', [AuthController::class, "login"]);
